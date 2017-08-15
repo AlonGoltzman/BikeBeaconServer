@@ -1,0 +1,7 @@
+---
+applications:
+- name: BikeBeacon
+  random-route: true
+  memory: 256M
+  instances: 1
+  path: target/BikeBeacon.war
