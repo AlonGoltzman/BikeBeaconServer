@@ -20,7 +20,7 @@ import com.google.gson.JsonParser;
 
 public class CloudantUtil {
 
-	private final Class LOCK = CloudantUtil.class;
+	private final Class<CloudantUtil> LOCK = CloudantUtil.class;
 
 	private String vcapServices;
 	private Database alertDB = null;
@@ -37,7 +37,7 @@ public class CloudantUtil {
 		vcapServices = System.getenv("VCAP_SERVICES");
 		client = createClient();
 		if (client != null)
-			alertDB = client.database(ALERT_DB_NAME, false);
+			setAlertDB(client.database(ALERT_DB_NAME, false));
 	}
 
 	private CloudantClient createClient() {
@@ -53,7 +53,7 @@ public class CloudantUtil {
 			url = cloudantCreds.get("url").getAsString();
 		} else {
 			log("CloudantUtil->createClient", "Running locally, searching inside assets/.cloudanturl");
-			url = AssetsUtil.load(".cloudanturl").extractContent().getLine(1);
+			url = AssetsUtil.load("url.cloudant").extractContent().getLine(1);
 			if (url == null || url.length() == 0) {
 				log("CloudantUtil->createClient",
 						"Couldn't load url from .cloudanturl, only possible option left is manual override, not supported.");
@@ -92,6 +92,14 @@ public class CloudantUtil {
 		log_f("CloudantUtil->getCreds", "Found: " + (String) dbEntry.getKey() + " inside VCAP_SERVICES.");
 
 		return obj.get("credentials").getAsJsonObject();
+	}
+
+	public Database getAlertDB() {
+		return alertDB;
+	}
+
+	public void setAlertDB(Database db) {
+		alertDB = db;
 	}
 
 }

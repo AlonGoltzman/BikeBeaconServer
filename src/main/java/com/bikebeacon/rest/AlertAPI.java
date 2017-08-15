@@ -4,6 +4,7 @@ import static com.bikebeacon.utils.Constants.ALERT_CONVERSATION_RECEIVED;
 import static com.bikebeacon.utils.Constants.ALERT_NEW;
 import static com.bikebeacon.utils.Constants.GET;
 import static com.bikebeacon.utils.Constants.JSON_ACTION;
+import static com.bikebeacon.utils.Constants.JSON_OWNER;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +15,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bikebeacon.Alert;
+import com.bikebeacon.cloudant.AlertStore;
 import com.bikebeacon.utils.PrintUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -52,17 +55,22 @@ public class AlertAPI extends HttpServlet {
 
 		JsonObject command = (JsonObject) new JsonParser().parse(builder.toString());
 		String action;
-		if ((action = command.get(JSON_ACTION).toString()) == null) {
+		String owner;
+		if (command.get(JSON_ACTION) == null || command.get(JSON_OWNER) == null
+				|| (action = command.get(JSON_ACTION).getAsString()) == null
+				|| (owner = command.get(JSON_OWNER).getAsString()) == null) {
 			response.sendError(400);
 			return;
 		}
+		AlertStore alerts = new AlertStore(owner);
 
 		switch (action) {
 		case ALERT_NEW:
-
+			Alert createdAlert = alerts.upload(Alert.fromJSON(command));
+			response.getWriter().write(createdAlert.getID());
 			break;
 		case ALERT_CONVERSATION_RECEIVED:
-
+			// TODO: inform CCH
 			break;
 		}
 	}
