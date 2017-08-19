@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="Gradle : BikeBeacon : BikeBeacon-0.0.1-ALERT_API_RELEASE.war">
+    <output-path>$PROJECT_DIR$/build/libs</output-path>
+    <properties id="gradle-properties">
+      <options external-project-path="$PROJECT_DIR$" />
+    </properties>
+    <root id="archive" name="BikeBeacon-0.0.1-ALERT_API_RELEASE.war">
+      <element id="artifact" artifact-name="Gradle : BikeBeacon : BikeBeacon-0.0.1-ALERT_API_RELEASE.war (exploded)" />
+    </root>
+  </artifact>
+</component>

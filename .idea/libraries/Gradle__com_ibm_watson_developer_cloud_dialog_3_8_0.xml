@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.ibm.watson.developer_cloud:dialog:3.8.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.ibm.watson.developer_cloud/dialog/3.8.0/e833d198939a29bd264a02f0db8c00e85c262d8a/dialog-3.8.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.ibm.watson.developer_cloud/dialog/3.8.0/d72ded6c11184e37a7ef8d5befc5bf983b1ad412/dialog-3.8.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

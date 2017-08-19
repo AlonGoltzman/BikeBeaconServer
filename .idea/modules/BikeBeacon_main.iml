@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="BikeBeacon:main" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="BikeBeacon" external.system.module.type="sourceSet" external.system.module.version="0.0.1-ALERT_API_RELEASE" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="web" name="Web Gradle : BikeBeacon-0.0.1-ALERT_API_RELEASE.war">
+      <configuration>
+        <webroots>
+          <root url="file://F:\Development\BikeBeaconServer\src\main\webapp" relative="/" />
+        </webroots>
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+    <output url="file://$MODULE_DIR$/../../out/production/classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../src/main">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Gradle: com.cloudant:cloudant-client:2.9.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:java-sdk:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: commons-codec:commons-codec:1.6" level="project" />
+    <orderEntry type="library" name="Gradle: com.cloudant:cloudant-http:2.9.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:alchemy:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:conversation:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:core:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:dialog:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:discovery:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:document-conversion:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:language-translation:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:language-translator:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:natural-language-classifier:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:natural-language-understanding:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:personality-insights:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:retrieve-and-rank:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:speech-to-text:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:text-to-speech:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:tone-analyzer:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:tradeoff-analytics:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:visual-recognition:3.8.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.squareup.okhttp3:okhttp:3.7.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.squareup.okhttp3:logging-interceptor:3.7.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.squareup.okhttp3:okhttp-urlconnection:3.7.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.commons:commons-lang3:3.4" level="project" />
+    <orderEntry type="library" name="Gradle: org.glassfish.jersey.bundles.repackaged:jersey-jsr166e:2.22.2" level="project" />
+    <orderEntry type="library" name="Gradle: commons-io:commons-io:2.4" level="project" />
+    <orderEntry type="library" name="Gradle: com.squareup.okio:okio:1.12.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.code.gson:gson:2.8.0" level="project" />
+    <orderEntry type="library" name="Java EE 6-Java EE 6" level="project" />
+  </component>
+</module>

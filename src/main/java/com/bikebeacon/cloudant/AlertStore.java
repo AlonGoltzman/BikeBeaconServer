@@ -5,12 +5,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.bikebeacon.Alert;
+import com.bikebeacon.pojo.Alert;
 import com.bikebeacon.utils.CloudantUtil;
 import com.bikebeacon.utils.DataStore;
 import com.cloudant.client.api.Database;
+import com.cloudant.client.api.model.Response;
 
-import static com.bikebeacon.utils.PrintUtils.*;
+import static com.bikebeacon.utils.PrintUtil.*;
 
 public class AlertStore implements DataStore<Alert> {
 
@@ -58,8 +59,10 @@ public class AlertStore implements DataStore<Alert> {
 
 	@Override
 	public Alert upload(Alert element) {
-		String id = db.save(element).getId();
-		return db.find(Alert.class, id);
+		Response saveRes = db.save(element);
+		element.setID(saveRes.getId());
+		element.setRev(saveRes.getRev());
+		return element;
 	}
 
 	@Override

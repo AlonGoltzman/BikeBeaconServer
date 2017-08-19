@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.ibm.watson.developer_cloud:retrieve-and-rank:3.8.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.ibm.watson.developer_cloud/retrieve-and-rank/3.8.0/da0fdcb6619c391029abbc7444a856da1052e20c/retrieve-and-rank-3.8.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.ibm.watson.developer_cloud/retrieve-and-rank/3.8.0/6babc67faa175511fe825d7d564b727e609d9ecc/retrieve-and-rank-3.8.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/BikeBeacon.iml" filepath="$PROJECT_DIR$/.idea/modules/BikeBeacon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/BikeBeacon_main.iml" filepath="$PROJECT_DIR$/.idea/modules/BikeBeacon_main.iml" group="BikeBeacon" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/BikeBeacon_test.iml" filepath="$PROJECT_DIR$/.idea/modules/BikeBeacon_test.iml" group="BikeBeacon" />
+    </modules>
+  </component>
+</project>

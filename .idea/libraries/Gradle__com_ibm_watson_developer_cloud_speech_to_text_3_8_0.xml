@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.ibm.watson.developer_cloud:speech-to-text:3.8.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.ibm.watson.developer_cloud/speech-to-text/3.8.0/3ed6179d7d78490f2a244241ae1b7f78df0d9e19/speech-to-text-3.8.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.ibm.watson.developer_cloud/speech-to-text/3.8.0/128a804af3386bfe516d380afea1c54b085be2f6/speech-to-text-3.8.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
