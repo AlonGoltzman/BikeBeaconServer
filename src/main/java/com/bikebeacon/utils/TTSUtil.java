@@ -24,12 +24,12 @@ public class TTSUtil {
     }
 
     public void readOutText(String input, OutputStream outStream) throws IOException {
-        InputStream inStream = textToSpeech.synthesize(input, Voice.EN_ALLISON, AudioFormat.OGG).execute();
+        InputStream inStream = textToSpeech.synthesize(input, Voice.EN_MICHAEL, AudioFormat.WAV).execute();
         InputStream wave = WaveUtils.reWriteWaveHeader(inStream);
 
         byte[] buffer = new byte[1024];
 
-        while(wave.read(buffer) != -1)
+        while (wave.read(buffer) != -1)
             outStream.write(buffer);
 
         inStream.close();

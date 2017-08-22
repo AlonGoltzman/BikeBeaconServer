@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServlet;
 
 public abstract class CCHDelegate extends HttpServlet {
 
+    protected CentralControlHub CCH;
+
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
@@ -25,6 +27,6 @@ public abstract class CCHDelegate extends HttpServlet {
     }
 
     private void informCCH() {
-        CentralControlHub.getCCH().notifyDelegateCreation(this);
+        (CCH = CentralControlHub.getCCH(getServletContext().getRealPath(""))).notifyDelegateCreation(this);
     }
 }

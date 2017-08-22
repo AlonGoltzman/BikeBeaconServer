@@ -32,6 +32,9 @@ public final class Constants {
 
     public static final String CONVERSATION_WORKSPACE_ID = "8984a29f-be2f-4f5c-afb4-873e9a4b0cbe";
 
+    public static final String FCM_RESPONSE = "response";
+    public static final String FCM_URL = "trackDownloadURL";
+
     public enum LOG_TYPE {
         INFO, WARNING, ERROR;
     }

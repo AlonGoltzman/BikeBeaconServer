@@ -67,6 +67,7 @@ public class Alert extends CloudantElement implements Fileable {
         alert.setGPSCoords(command.get(JSON_GPS).getAsString());
         alert.setClosed(command.get(JSON_IS_CLOSED).getAsBoolean());
         alert.setPreviousAlertID(command.get(JSON_PREVIOUS_ALERT).getAsString());
+        alert.setOwner(command.get(JSON_OWNER).getAsString());
         return alert;
     }
 

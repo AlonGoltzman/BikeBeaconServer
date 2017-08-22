@@ -57,6 +57,7 @@ public class AlertAPI extends CCHDelegate {
             throws ServletException, IOException {
         response.sendError(403);
         PrintUtil.log(GET, "IP: " + request.getRemoteAddr() + " tried to send alert.");
+        System.out.println(getServletContext().getRealPath(""));
     }
 
     @Override
@@ -74,15 +75,17 @@ public class AlertAPI extends CCHDelegate {
 
         JsonObject command = (JsonObject) new JsonParser().parse(builder.toString());
         String action;
-        String owner;
-        if (command.get(JSON_ACTION) == null || command.get(JSON_OWNER) == null
-                || (action = command.get(JSON_ACTION).getAsString()) == null
-                || (owner = command.get(JSON_OWNER).getAsString()) == null) {
+        String owner = request.getRemoteAddr();
+        if (command.get(JSON_ACTION) == null
+                || (action = command.get(JSON_ACTION).getAsString()) == null) {
             response.sendError(400);
             out.close();
             stream.close();
             return;
         }
+        if (command.has(JSON_OWNER))
+            command.remove(JSON_OWNER);
+        command.addProperty(JSON_OWNER, owner);
         AlertStore alerts = new AlertStore(owner);
         String ID = null;
         if (command.get(JSON_ID) != null)
@@ -96,7 +99,7 @@ public class AlertAPI extends CCHDelegate {
                     Case c = new Case();
                     c.setActive(true);
                     c.setOriginAlert(createdAlert);
-                    CentralControlHub.getCCH().entrustCase(AlertAPI.this, c);
+                    CCH.entrustCase(AlertAPI.this, c);
                 }).start();
                 break;
             case ALERT_CONVERSATION_RECEIVED:

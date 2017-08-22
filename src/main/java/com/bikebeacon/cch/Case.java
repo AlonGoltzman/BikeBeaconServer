@@ -67,6 +67,10 @@ public class Case implements Fileable {
         this.originAlert = originAlert;
     }
 
+    public Alert getOriginAlert() {
+        return originAlert;
+    }
+
     public void setJerry(ConversationUtil jerry) {
         this.jerry = jerry;
     }
