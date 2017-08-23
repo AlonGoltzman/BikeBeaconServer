@@ -4,7 +4,7 @@
     <facet type="web" name="Web Gradle : BikeBeacon-0.0.1-ALERT_API_RELEASE.war">
       <configuration>
         <webroots>
-          <root url="file://F:\Development\BikeBeaconServer\src\main\webapp" relative="/" />
+          <root url="file://C:\Workspace\BikeBeaconServer\src\main\webapp" relative="/" />
         </webroots>
       </configuration>
     </facet>

@@ -35,6 +35,23 @@ public final class Constants {
     public static final String FCM_RESPONSE = "response";
     public static final String FCM_URL = "trackDownloadURL";
 
+    public static final String RESPONSE_INPUT = "inputFormat";
+    public static final String RESPONSE_OUTPUT = "outputFormat";
+
+    public static final String CLOUD_CONVERT_ID = "id";
+    public static final String CLOUD_CONVERT_URL = "url";
+    public static final String CLOUD_CONVERT_PROCESS_REQUEST_OUTPUT_FORMAT = "outputformat";
+    public static final String CLOUD_CONVERT_PROCESS_REQUEST_INPUT_TYPE = "input";
+    public static final String CLOUD_CONVERT_UPLOAD_JSON = "upload";
+    public static final String CLOUD_CONVERT_STEP = "step";
+    public static final String CLOUD_CONVERT_STEP_INPUT = "input";
+    public static final String CLOUD_CONVERT_STEP_WAIT = "wait";
+    public static final String CLOUD_CONVERT_STEP_CONVERT = "convert";
+    public static final String CLOUD_CONVERT_STEP_OUTPUT = "output";
+    public static final String CLOUD_CONVERT_STEP_ERROR = "error";
+    public static final String CLOUD_CONVERT_STEP_FINISHED = "finished";
+    public static final String CLOUD_CONVERT_EXTENTION = "ext";
+
     public enum LOG_TYPE {
         INFO, WARNING, ERROR;
     }

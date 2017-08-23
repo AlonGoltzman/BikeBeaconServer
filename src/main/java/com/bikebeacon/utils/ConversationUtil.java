@@ -12,7 +12,7 @@ public class ConversationUtil {
     private ConversationService convo;
 
     public ConversationUtil() {
-        FileContentDistributer distributer = AssetsUtil.load("url.conversation").extractContent();
+        FileContentDistributer distributer = AssetsUtil.load("conversation.creds").extractContent();
         String username = distributer.getLine(2);
         String password = distributer.getLine(3);
         convo = new ConversationService("2017-05-26", username, password);

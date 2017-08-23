@@ -1,9 +1,7 @@
 package com.bikebeacon.cch;
 
-import com.bikebeacon.utils.AssetsUtil;
-import com.bikebeacon.utils.ConversationUtil;
-import com.bikebeacon.utils.FCMUtil;
-import com.bikebeacon.utils.TTSUtil;
+import com.bikebeacon.pojo.TaskCallback;
+import com.bikebeacon.utils.*;
 import com.google.gson.JsonObject;
 import com.ibm.watson.developer_cloud.conversation.v1.model.MessageResponse;
 
@@ -19,7 +17,7 @@ import static com.bikebeacon.utils.Constants.FCM_RESPONSE;
 import static com.bikebeacon.utils.PrintUtil.error;
 import static com.bikebeacon.utils.PrintUtil.log;
 
-public final class CentralControlHub implements CaseHandler {
+public final class CentralControlHub implements CaseHandler, TaskCallback {
 
     private String path;
     private Timer killTimer;
@@ -106,6 +104,15 @@ public final class CentralControlHub implements CaseHandler {
         return factChecker.getMACToTokenMap().get(MAC);
     }
 
+    public void receivedResponse(String inputFormat, String outputFormat, File responseFile) {
+        String requestAddr = responseFile.getName().replace(inputFormat, outputFormat);
+
+        CloudConvertUtil util = CloudConvertUtil.getUtil();
+        util.processRequest(inputFormat, outputFormat,
+                this,
+                new File(responseFile.getParent(), "/messageFor" + requestAddr + "." + outputFormat));
+    }
+
     private String forgeURLForFile(File file) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < 10; i++)
@@ -127,4 +134,9 @@ public final class CentralControlHub implements CaseHandler {
         return factChecker.getKeyForFileMap().remove(key);
     }
 
+    @Override
+    public void onDone(File outputFile) {
+        STTUtil util = STTUtil.getUtil();
+        util.recognize(outputFile);
+    }
 }

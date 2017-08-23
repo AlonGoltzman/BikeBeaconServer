@@ -16,7 +16,7 @@ public class TTSUtil {
     private TextToSpeech textToSpeech;
 
     public TTSUtil() {
-        FileContentDistributer distributer = AssetsUtil.load("url.tts");
+        FileContentDistributer distributer = AssetsUtil.load("tts.creds");
         distributer.extractContent();
         String username = distributer.getLine(2);
         String password = distributer.getLine(3);

@@ -56,7 +56,7 @@ public class CloudantUtil {
             url = cloudantCreds.get("url").getAsString();
         } else {
             log("CloudantUtil->createClient", "Running locally, searching inside assets/.cloudanturl");
-            FileContentDistributer dist = AssetsUtil.load("url.cloudant").extractContent();
+            FileContentDistributer dist = AssetsUtil.load("cloudant.creds").extractContent();
             url = dist.getLine(1);
             if (url == null || url.length() == 0) {
                 log("CloudantUtil->createClient",

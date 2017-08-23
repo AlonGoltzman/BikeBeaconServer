@@ -1,4 +1,0 @@
-target/*
-|target/JavaHelloWorldApp.war
-/target/
-/.apt_generated/
