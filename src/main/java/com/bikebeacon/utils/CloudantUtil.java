@@ -18,7 +18,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import com.bikebeacon.utils.AssetsUtil.FileContentDistributer;
+import com.bikebeacon.utils.AssetsUtil.FileContentDistributor;
 
 public class CloudantUtil {
 
@@ -56,7 +56,7 @@ public class CloudantUtil {
             url = cloudantCreds.get("url").getAsString();
         } else {
             log("CloudantUtil->createClient", "Running locally, searching inside assets/.cloudanturl");
-            FileContentDistributer dist = AssetsUtil.load("cloudant.creds").extractContent();
+            FileContentDistributor dist = AssetsUtil.load("cloudant.creds").extractContent();
             url = dist.getLine(1);
             if (url == null || url.length() == 0) {
                 log("CloudantUtil->createClient",

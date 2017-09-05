@@ -1,17 +1,16 @@
 package com.bikebeacon.utils;
 
-import static com.bikebeacon.utils.Constants.LOG_TYPE.ERROR;
-import static com.bikebeacon.utils.Constants.LOG_TYPE.INFO;
-import static com.bikebeacon.utils.Constants.LOG_PATH;
+import static com.bikebeacon.pojo.Constants.LOG_TYPE.ERROR;
+import static com.bikebeacon.pojo.Constants.LOG_TYPE.INFO;
+import static com.bikebeacon.pojo.Constants.LOG_PATH;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
-import com.bikebeacon.utils.Constants.LOG_TYPE;
+import com.bikebeacon.pojo.Constants.LOG_TYPE;
 
 public final class PrintUtil {
 

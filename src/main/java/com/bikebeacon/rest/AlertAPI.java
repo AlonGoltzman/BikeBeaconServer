@@ -14,15 +14,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.bikebeacon.cch.CCHDelegate;
 import com.bikebeacon.cch.Case;
-import com.bikebeacon.cch.CentralControlHub;
-import com.bikebeacon.pojo.Alert;
-import com.bikebeacon.cloudant.AlertStore;
-import com.bikebeacon.utils.Constants;
+import com.bikebeacon.utils.cloudant.alert.Alert;
+import com.bikebeacon.utils.cloudant.alert.AlertStore;
+import com.bikebeacon.pojo.Constants;
 import com.bikebeacon.utils.PrintUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import static com.bikebeacon.utils.Constants.*;
+import static com.bikebeacon.pojo.Constants.*;
 
 @WebServlet("/alert_api")
 public class AlertAPI extends CCHDelegate {
@@ -31,22 +30,6 @@ public class AlertAPI extends CCHDelegate {
      */
     private static final long serialVersionUID = 721982435L;
 
-    @Override
-    public void init() throws ServletException {
-        super.init();
-        setValues();
-    }
-
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-        setValues();
-    }
-
-    private void setValues() {
-        Constants.LOG_PATH = new File(getServletContext().getRealPath(""), "/assets/log.bblog");
-        Constants.ASSETS_FOLDER = new File(getServletContext().getRealPath(""), "/assets");
-    }
 
     /**
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
@@ -75,8 +58,10 @@ public class AlertAPI extends CCHDelegate {
 
         JsonObject command = (JsonObject) new JsonParser().parse(builder.toString());
         String action;
+        String uuid;
         String owner = request.getRemoteAddr();
-        if (command.get(JSON_ACTION) == null
+        if (command.get(JSON_UUID) == null || (uuid = command.get(JSON_UUID).getAsString()) == null ||
+                command.get(JSON_ACTION) == null
                 || (action = command.get(JSON_ACTION).getAsString()) == null) {
             response.sendError(400);
             out.close();
@@ -90,7 +75,6 @@ public class AlertAPI extends CCHDelegate {
         String ID = null;
         if (command.get(JSON_ID) != null)
             ID = command.get(JSON_ID).getAsString();
-
         switch (action) {
             case ALERT_NEW:
                 Alert createdAlert = alerts.upload(Alert.fromJSON(command));
@@ -101,9 +85,6 @@ public class AlertAPI extends CCHDelegate {
                     c.setOriginAlert(createdAlert);
                     CCH.entrustCase(AlertAPI.this, c);
                 }).start();
-                break;
-            case ALERT_CONVERSATION_RECEIVED:
-                // TODO: inform CCH
                 break;
             case ALERT_DELTE:
                 alerts.delete(ID);

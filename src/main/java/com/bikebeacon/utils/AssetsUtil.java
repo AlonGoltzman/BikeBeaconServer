@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-import static com.bikebeacon.utils.Constants.ASSETS_FOLDER;
+import static com.bikebeacon.pojo.Constants.ASSETS_FOLDER;
+import static com.bikebeacon.utils.PrintUtil.error;
 import static com.bikebeacon.utils.PrintUtil.error_f;
+import static com.bikebeacon.utils.PrintUtil.log;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -13,8 +15,8 @@ import java.util.ArrayList;
 public class AssetsUtil {
 
 
-    public static FileContentDistributer load(String fileName) {
-        return new FileContentDistributer(new File(ASSETS_FOLDER, fileName));
+    public static FileContentDistributor load(String fileName) {
+        return new FileContentDistributor(new File(ASSETS_FOLDER, fileName));
     }
 
     public static void save(JsonObject data) {
@@ -26,17 +28,43 @@ public class AssetsUtil {
         }
     }
 
-    public static class FileContentDistributer {
+    public static boolean ensureFileReady(File file) {
+        File parent = file.getParentFile();
+        if (!parent.exists())
+            if (!parent.mkdirs()) {
+                error("AssetsUtil->ensureFileReady", "Failed creating directories for file.");
+                return false;
+            }
+        if (file.exists())
+            if (!file.delete()) {
+                log("AssetsUtil->ensureFileReady", "Failed deleting file.");
+                return false;
+            }
+        if (!file.exists())
+            try {
+                if (!file.createNewFile()) {
+                    log("AssetsUtil->ensureFileReady", "Failed creating new file.");
+                    return false;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        return true;
+
+    }
+
+    public static class FileContentDistributor {
         private ArrayList<String> content;
 
         private File file;
 
-        public FileContentDistributer(File fileToLoad) {
+        public FileContentDistributor(File fileToLoad) {
             file = fileToLoad;
             content = new ArrayList<>();
         }
 
-        public FileContentDistributer extractContent() {
+        public FileContentDistributor extractContent() {
             try (BufferedReader stream = new BufferedReader(new FileReader(file))) {
                 String line;
                 while ((line = stream.readLine()) != null)

@@ -1,22 +1,19 @@
 package com.bikebeacon.utils;
 
+import com.bikebeacon.cch.Case;
+import com.bikebeacon.pojo.CloudConvertTaskListener;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.*;
 import okio.BufferedSink;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 import static com.bikebeacon.utils.Constants.*;
-import static com.bikebeacon.utils.PrintUtil.error;
-import static com.bikebeacon.utils.PrintUtil.error_f;
-import static com.bikebeacon.utils.PrintUtil.log;
+import static com.bikebeacon.utils.PrintUtil.*;
 
 /**
  * Created by Mgr on 8/23/2017.
@@ -31,12 +28,14 @@ public class CloudConvertUtil {
     private String outputFormat;
 
     private String processURL;
-    private String processID;
+    private Case caseFile;
 
     private File inputAudioFile;
     private File convertedAudioFile;
 
-    public CloudConvertUtil() {
+    private CloudConvertTaskListener doneCallback;
+
+    public CloudConvertUtil(CloudConvertTaskListener callback) {
         apiKey = AssetsUtil.load("cloudconvert.creds").extractContent().getLine(1);
         clientHTTP = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
@@ -48,6 +47,7 @@ public class CloudConvertUtil {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+        doneCallback = callback;
     }
 
     public void processRequest(final JsonObject requestJSON, File uploadFile, File outputFile) {
@@ -72,7 +72,7 @@ public class CloudConvertUtil {
                     public void writeTo(BufferedSink sink) throws IOException {
                         sink.write(requestJSON.toString().getBytes());
                     }
-                }).header("Authorization", "Bearer " + apiKey).build();
+                }).header("Authorization", "Bearer " + apiKey).header("Content-Type", "application/json").build();
         clientHTTP.newCall(conversionRequest).enqueue(new ProcessRequestCreationCallback());
     }
 
@@ -109,6 +109,14 @@ public class CloudConvertUtil {
         return (JsonObject) new JsonParser().parse(jsonResponseString.toString());
     }
 
+    public Case getCaseFile() {
+        return caseFile;
+    }
+
+    public void setCaseFile(Case caseFile) {
+        this.caseFile = caseFile;
+    }
+
     private class ProcessRequestCreationCallback implements Callback {
         @Override
         public void onFailure(Call call, IOException e) {
@@ -118,19 +126,21 @@ public class CloudConvertUtil {
         @Override
         public void onResponse(Call call, Response response) throws IOException {
             if (response.code() != 200) {
-                error_f("CloudConvertUtil->ProcessRequestCreationCallback", "Returned response that isn't 200. %s", response.message());
+                error_f("CloudConvertUtil->ProcessRequestCreationCallback", "Returned response that isn't 200. %s", response);
+                clientHTTP.newCall(new Request.Builder()
+                        .method("DELETE", null).url(processURL).build()).execute();
             } else {
                 JsonObject json = getJSONFromResponse(response);
 
-                String url = json.get(CLOUD_CONVERT_URL).getAsString();
-                String id = json.get(CLOUD_CONVERT_URL).getAsString();
+                processURL = "https:" + json.get(CLOUD_CONVERT_URL).getAsString();
 
                 final JsonObject requestJson = new JsonObject();
-                requestJson.addProperty(CLOUD_CONVERT_PROCESS_REQUEST_OUTPUT_FORMAT, outputFormat == null ? "mp3" : outputFormat);
                 requestJson.addProperty(CLOUD_CONVERT_PROCESS_REQUEST_INPUT_TYPE, "upload");
+                requestJson.addProperty(CLOUD_CONVERT_PROCESS_REQUEST_OUTPUT_FORMAT, outputFormat == null ? "mp3" : outputFormat);
+                log_f("CloudConvertUtil->ProcessRequestCreationCallback", "Json is: %s", requestJson.toString());
 
                 Request starProcessingRequest = new Request.Builder()
-                        .url(url).method("POST", new RequestBody() {
+                        .url(processURL).method("POST", new RequestBody() {
                             @Override
                             public MediaType contentType() {
                                 return null;
@@ -140,8 +150,9 @@ public class CloudConvertUtil {
                             public void writeTo(BufferedSink sink) throws IOException {
                                 sink.write(requestJson.toString().getBytes());
                             }
-                        }).build();
+                        }).header("Authorization", "Bearer " + apiKey).header("Content-Type", "application/json").build();
                 clientHTTP.newCall(starProcessingRequest).enqueue(new ProcessingRequestCallback());
+                response.close();
             }
         }
     }
@@ -157,11 +168,12 @@ public class CloudConvertUtil {
         public void onResponse(Call call, Response response) throws IOException {
             if (response.code() != 200) {
                 error_f("CloudConvertUtil->ProcessingRequestCallback", "Returned response that isn't 200. %s", response.message());
+                clientHTTP.newCall(new Request.Builder()
+                        .method("DELETE", null).url(processURL).build()).execute();
             } else {
                 JsonObject json = getJSONFromResponse(response);
                 String uploadUrl = json.get(CLOUD_CONVERT_UPLOAD_JSON).getAsJsonObject().get(CLOUD_CONVERT_URL).getAsString();
-                processURL = json.get(CLOUD_CONVERT_URL).getAsString();
-                processID = json.get(CLOUD_CONVERT_ID).getAsString();
+                processURL = "https://" + json.get(CLOUD_CONVERT_URL).getAsString();
 
                 if (inputAudioFile == null) {
                     error("CloudConvertUtil->ProcessingRequestCallback", "No audio file.");
@@ -170,7 +182,7 @@ public class CloudConvertUtil {
                 final InputStream fileStream = new FileInputStream(inputAudioFile);
 
                 Request uploadRequest = new Request.Builder()
-                        .url(uploadUrl + "/" + inputAudioFile.getName()).header("Content-Length", String.valueOf(inputAudioFile.length())).method("PUT", new RequestBody() {
+                        .url("https:" + uploadUrl + "/" + inputAudioFile.getName()).header("Content-Length", String.valueOf(inputAudioFile.length())).method("PUT", new RequestBody() {
                             @Override
                             public MediaType contentType() {
                                 return null;
@@ -184,6 +196,7 @@ public class CloudConvertUtil {
                             }
                         }).build();
                 clientHTTP.newCall(uploadRequest).enqueue(new StatusPullCallback());
+                response.close();
             }
         }
     }
@@ -204,6 +217,7 @@ public class CloudConvertUtil {
                         .url(processURL).method("GET", null).build();
 
                 clientHTTP.newCall(statusUpdate).enqueue(new StatusUpdateCallback());
+                response.close();
 
             }
         }
@@ -219,6 +233,8 @@ public class CloudConvertUtil {
         public void onResponse(Call call, Response response) throws IOException {
             if (response.code() != 200) {
                 error_f("CloudConvertUtil->StatusUpdateCallback", "Returned response that isn't 200. %s", response.message());
+                clientHTTP.newCall(new Request.Builder()
+                        .method("DELETE", null).url(processURL).build()).execute();
             } else {
                 JsonObject json = getJSONFromResponse(response);
 
@@ -241,6 +257,7 @@ public class CloudConvertUtil {
                         clientHTTP.newCall(newRequest).enqueue(new ProcessDoneCallback());
                         break;
                 }
+                response.close();
             }
         }
     }
@@ -255,15 +272,55 @@ public class CloudConvertUtil {
         public void onResponse(Call call, Response response) throws IOException {
             if (response.code() != 200) {
                 error_f("CloudConvertUtil->ProcessDoneCallback", "Returned response that isn't 200. %s", response.message());
+                clientHTTP.newCall(new Request.Builder()
+                        .method("DELETE", null).url(processURL).build()).execute();
             } else {
                 JsonObject json = getJSONFromResponse(response);
 
                 JsonObject outputObject = json.getAsJsonObject(CLOUD_CONVERT_STEP_OUTPUT);
-                String downloadURL = outputObject.get(CLOUD_CONVERT_URL).getAsString();
+                String downloadURL = "https://" + outputObject.get(CLOUD_CONVERT_URL).getAsString();
                 String extention = outputObject.get(CLOUD_CONVERT_EXTENTION).getAsString();
 
-                Request newRequest = new Request.Builder().url(downloadURL).method()
+                Request newRequest = new Request.Builder().url(downloadURL).method("GET", null).build();
 
+                clientHTTP.newCall(newRequest).enqueue(new DownloadTask());
+                response.close();
+
+            }
+        }
+    }
+
+    private class DownloadTask implements Callback {
+        @Override
+        public void onFailure(Call call, IOException e) {
+            error_f("CloudConvertUtil->ProcessDoneCallback", "Failed creating a process: %s", e.getMessage());
+        }
+
+        @Override
+        public void onResponse(Call call, Response response) throws IOException {
+            if (response.code() != 200) {
+                error_f("CloudConvertUtil->ProcessDoneCallback", "Returned response that isn't 200. %s", response.message());
+                clientHTTP.newCall(new Request.Builder()
+                        .method("DELETE", null).url(processURL).build()).execute();
+            } else {
+                InputStream stream = response.body().byteStream();
+
+                FileOutputStream output = new FileOutputStream(convertedAudioFile);
+
+                byte[] buffer = new byte[1024];
+
+                while (stream.read(buffer) != -1)
+                    output.write(buffer);
+
+                stream.close();
+                output.close();
+
+                if (doneCallback != null)
+                    doneCallback.onFileDownloaded(caseFile, convertedAudioFile);
+
+                clientHTTP.newCall(new Request.Builder()
+                        .method("DELETE", null).url(processURL).build()).execute();
+                response.close();
             }
         }
     }

@@ -1,23 +1,29 @@
 package com.bikebeacon.cch;
 
-import com.bikebeacon.pojo.TaskCallback;
+import com.bikebeacon.pojo.TaskCompletionListener;
 import com.bikebeacon.utils.*;
+import com.bikebeacon.utils.cloudant.mailing_list.Person;
+import com.bikebeacon.utils.cloudant.uuid.Unique;
+import com.bikebeacon.utils.cloudconvert.CloudConvertUtil;
 import com.google.gson.JsonObject;
+import com.google.gson.internal.LinkedTreeMap;
 import com.ibm.watson.developer_cloud.conversation.v1.model.MessageResponse;
+import com.ibm.watson.developer_cloud.speech_to_text.v1.model.SpeechResults;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
 
-import static com.bikebeacon.utils.Constants.FCM_RESPONSE;
+import static com.bikebeacon.pojo.Constants.*;
+import static com.bikebeacon.utils.AssetsUtil.ensureFileReady;
 import static com.bikebeacon.utils.PrintUtil.error;
 import static com.bikebeacon.utils.PrintUtil.log;
+import static com.bikebeacon.utils.PrintUtil.log_f;
 
-public final class CentralControlHub implements CaseHandler, TaskCallback {
+public final class CentralControlHub implements CaseHandler, TaskCompletionListener {
 
     private String path;
     private Timer killTimer;
@@ -42,8 +48,6 @@ public final class CentralControlHub implements CaseHandler, TaskCallback {
         factChecker = CentralControlHubFactChecker.getFactChecker();
         path = defaultPath;
         killTimer = new Timer();
-
-
     }
 
     public void entrustCase(CCHDelegate creator, Case newCase) {
@@ -68,49 +72,22 @@ public final class CentralControlHub implements CaseHandler, TaskCallback {
         AssetsUtil.save(doneCase.fileify());
     }
 
-    public void notifyDelegateCreation(CCHDelegate delegate) {
+    void notifyDelegateCreation(CCHDelegate delegate) {
+        if (factChecker == null)
+            factChecker = CentralControlHubFactChecker.getFactChecker();
         factChecker.addCCHDelegate(delegate);
     }
 
-    public void notifyDelegateEliminated(CCHDelegate delegate) {
+    void notifyDelegateEliminated(CCHDelegate delegate) {
         factChecker.deleteCCHDelegate(delegate);
     }
 
     private void beginSequence(Case caseToInitiate) {
-        ConversationUtil convoUtil = new ConversationUtil();
-        String owner = caseToInitiate.getOriginAlert().getOwner();
-        FCMUtil util = new FCMUtil(owner);
-        JsonObject FCMMessage = new JsonObject();
-        JsonObject FCMData = new JsonObject();
-
-        MessageResponse response = convoUtil.tellJerry("");
-
-        FCMData.addProperty(FCM_RESPONSE, response.getText().get(0));
-
+        ConversationUtil convoUtil = new ConversationUtil(this, caseToInitiate);
         caseToInitiate.setJerry(convoUtil);
-
-        FCMMessage.addProperty("to", getTokenForOwner(owner));
-        FCMMessage.addProperty("priority", "high");
-        FCMMessage.add("data", FCMData);
-
-        util.send(FCMMessage);
-    }
-
-    public void setToken(String MAC, String token) {
-        factChecker.getMACToTokenMap().put(MAC, token);
-    }
-
-    public String getTokenForOwner(String MAC) {
-        return factChecker.getMACToTokenMap().get(MAC);
-    }
-
-    public void receivedResponse(String inputFormat, String outputFormat, File responseFile) {
-        String requestAddr = responseFile.getName().replace(inputFormat, outputFormat);
-
-        CloudConvertUtil util = CloudConvertUtil.getUtil();
-        util.processRequest(inputFormat, outputFormat,
-                this,
-                new File(responseFile.getParent(), "/messageFor" + requestAddr + "." + outputFormat));
+        convoUtil.setInput("");
+        convoUtil.setContext(null);
+        convoUtil.execute();
     }
 
     private String forgeURLForFile(File file) {
@@ -126,7 +103,6 @@ public final class CentralControlHub implements CaseHandler, TaskCallback {
         FileKillTask task = new FileKillTask(key);
         factChecker.addNewKillTask(key, task);
         killTimer.schedule(task, 1000 * 60 * 60);
-
     }
 
     public File destroyKey(String key) {
@@ -134,9 +110,142 @@ public final class CentralControlHub implements CaseHandler, TaskCallback {
         return factChecker.getKeyForFileMap().remove(key);
     }
 
+    public void setToken(String MAC, String token) {
+        factChecker.getMACToTokenMap().put(MAC, token);
+    }
+
+    public String getTokenForOwner(String MAC) {
+        return factChecker.getMACToTokenMap().get(MAC);
+    }
+
+    public void receivedResponse(String inputFormat, String outputFormat, File responseFile) {
+        String ownerAddr = responseFile.getName().replace("response." + inputFormat, "");
+        Case handlingCase = getFactChecker().getCase(ownerAddr);
+
+        JsonObject request = new JsonObject();
+        request.addProperty("inputformat", inputFormat);
+        request.addProperty("outputformat", outputFormat);
+
+        CloudConvertUtil util = new CloudConvertUtil(this);
+        util.setInputFormat(inputFormat);
+        util.setOutputFormat(outputFormat);
+        util.setInputAudioFile(responseFile);
+        util.setConvertedAudioFile(new File(responseFile.getParentFile(), ownerAddr + "." + outputFormat));
+        util.setCaseFile(handlingCase);
+        util.setRequestJson(request);
+
+        util.execute();
+
+    }
+
+
     @Override
-    public void onDone(File outputFile) {
-        STTUtil util = STTUtil.getUtil();
-        util.recognize(outputFile);
+    public void onSuccess(int responder, Object... replyParams) {
+        TTSUtil ttsUtil;
+        STTUtil sttUtil;
+        FCMUtil fcmUtil;
+        ConversationUtil convoUtil;
+        MailingListUtil mailingListUtil;
+        JsonObject FCMMessage;
+        JsonObject FCMData;
+        Case ownerCase;
+        String UUID;
+        File outputFile;
+        LinkedTreeMap<String, Object> jerryContext;
+        switch (responder) {
+            case 1: //TTS Util
+                ownerCase = (Case) replyParams[0];
+                outputFile = (File) replyParams[1];
+                String key = forgeURLForFile(outputFile);
+                scheduleKillForFileKey(key);
+                fcmUtil = new FCMUtil(this);
+                FCMMessage = new JsonObject();
+                FCMData = new JsonObject();
+                FCMData.addProperty(FCM_URL, key);
+                jerryContext = (LinkedTreeMap<String, Object>) ownerCase.getJerryContext();
+                if (jerryContext.containsKey(CONVERSATION_CONTEXT_NUMBER) &&
+                        jerryContext.containsKey(CONVERSATION_CONTEXT_CALL) &&
+                        (boolean) jerryContext.get(CONVERSATION_CONTEXT_CALL))
+                    FCMData.addProperty(FCM_CALL, ownerCase.getJerryContext().get(CONVERSATION_CONTEXT_NUMBER).toString());
+                FCMMessage.addProperty("to", getTokenForOwner(ownerCase.getOwner()));
+                FCMMessage.addProperty("priority", "high");
+                FCMMessage.add("data", FCMData);
+                fcmUtil.setRequestJson(FCMMessage);
+                fcmUtil.execute();
+                break;
+            case 2:// STT Util
+                ownerCase = (Case) replyParams[0];
+                SpeechResults results = (SpeechResults) replyParams[1];
+                UUID = ownerCase.getOriginAlert().getUuid();
+                String sttResponse;
+                String actualSTTResponse = null;
+                try {
+                    sttResponse = results.getResults().get(0).getAlternatives().get(0).getTranscript();
+                    actualSTTResponse = ownerCase.adaptContext(sttResponse);
+                } catch (IndexOutOfBoundsException e) {
+                    error("CCH->onSuccess", "Nothing understood from what the person was saying.");
+                }
+                mailingListUtil = new MailingListUtil(new Unique(UUID), this);
+                mailingListUtil.setOwnerCase(ownerCase);
+                jerryContext = (LinkedTreeMap<String, Object>) ownerCase.getJerryContext();
+                if (jerryContext.containsKey(CONVERSATION_CONTEXT_NUMBER))
+                    mailingListUtil.setPhoneNumber(jerryContext.get(CONVERSATION_CONTEXT_NUMBER).toString());
+                else if (jerryContext.containsKey(CONVERSATION_CONTEXT_CALL_PERSON))
+                    mailingListUtil.setPerson(jerryContext.get(CONVERSATION_CONTEXT_CALL_PERSON).toString());
+                mailingListUtil.setMessage(actualSTTResponse);
+                mailingListUtil.execute();
+                break;
+            case 3: //Conversation Util
+                ownerCase = (Case) replyParams[0];
+                MessageResponse response = (MessageResponse) replyParams[1];
+                ownerCase.setJerryContext(response.getContext());
+                ttsUtil = new TTSUtil(this);
+                ttsUtil.setInput(response.getText().get(0));
+                ttsUtil.setHandlingCase(ownerCase);
+                outputFile = new File(path, ownerCase.getOwner() + ".wav");
+                if (!ensureFileReady(outputFile)) {
+                    error("CCH->onSuccess", "Failed creating file for TTS service.");
+                    return;
+                }
+                ttsUtil.setOutFile(outputFile);
+                ttsUtil.execute();
+                break;
+            case 5: //FCM Util
+                log("CCH->onSuccess", "FCM Message went through.");
+                break;
+            case 6: //CloudConvert Util
+                ownerCase = (Case) replyParams[0];
+                outputFile = (File) replyParams[1];
+                sttUtil = new STTUtil(this);
+                sttUtil.setOriginCase(ownerCase);
+                sttUtil.setAudioFile(outputFile);
+                sttUtil.execute();
+                break;
+            case 7://Mailing List Util
+                ownerCase = (Case) replyParams[0];
+                String message = "";
+                if (replyParams.length >= 2)
+                    message = (String) replyParams[1];
+                Person personToCall = null;
+                if (replyParams.length == 3)
+                    personToCall = (Person) replyParams[2];
+                jerryContext = (LinkedTreeMap<String, Object>) ownerCase.getJerryContext();
+                if (personToCall != null) {
+                    jerryContext.put(CONVERSATION_CONTEXT_NUMBER_CONTAINED_IN_MAILING_LIST, true);
+                    jerryContext.put(CONVERSATION_CONTEXT_NUMBER, personToCall.getPhoneNumber());
+                    jerryContext.put(CONVERSATION_CONTEXT_CALL_PERSON, personToCall.getName());
+                }
+                convoUtil = ownerCase.getJerry();
+                convoUtil.reset();
+                convoUtil.setContext(ownerCase.getJerryContext());
+                convoUtil.setInput(message);
+                convoUtil.execute();
+                break;
+        }
+    }
+
+    @Override
+    public void onFailed(int responder, Throwable reason) {
+
     }
 }

@@ -2,7 +2,9 @@ package com.bikebeacon.cch;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public final class CentralControlHubFactChecker {
 
@@ -52,6 +54,15 @@ public final class CentralControlHubFactChecker {
 
     void addNewKillTask(String key, FileKillTask task) {
         keyToTask.put(key, task);
+    }
+
+    Case getCase(String Mac) {
+        ArrayList<Case> allCases = getAllActiveCases();
+        try {
+            return allCases.stream().filter(aCase -> aCase.getOriginAlert().getOwner().equals(Mac)).collect(Collectors.toList()).get(0);
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
     }
 
     FileKillTask getKillTask(String key) {

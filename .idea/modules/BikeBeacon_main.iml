@@ -4,7 +4,7 @@
     <facet type="web" name="Web Gradle : BikeBeacon-0.0.1-ALERT_API_RELEASE.war">
       <configuration>
         <webroots>
-          <root url="file://C:\Workspace\BikeBeaconServer\src\main\webapp" relative="/" />
+          <root url="file://F:\Development\BikeBeaconServer\src\main\webapp" relative="/" />
         </webroots>
       </configuration>
     </facet>
@@ -18,10 +18,21 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Gradle: com.cloudant:cloudant-client:2.9.0" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../lib/ojdbc7.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:java-sdk:3.8.0" level="project" />
-    <orderEntry type="library" name="Gradle: commons-codec:commons-codec:1.6" level="project" />
-    <orderEntry type="library" name="Gradle: com.cloudant:cloudant-http:2.9.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.querydsl:querydsl-scala:4.1.4" level="project" />
+    <orderEntry type="library" name="Gradle: commons-io:commons-io:2.5" level="project" />
+    <orderEntry type="library" name="Gradle: com.cloudant:cloudant-client:2.9.0" level="project" />
+    <orderEntry type="library" name="Gradle: commons-fileupload:commons-fileupload:1.3.3" level="project" />
+    <orderEntry type="library" name="Gradle: org.jetbrains:annotations:15.0" level="project" />
     <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:alchemy:3.8.0" level="project" />
     <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:conversation:3.8.0" level="project" />
     <orderEntry type="library" name="Gradle: com.ibm.watson.developer_cloud:core:3.8.0" level="project" />
@@ -44,8 +55,14 @@
     <orderEntry type="library" name="Gradle: com.squareup.okhttp3:okhttp-urlconnection:3.7.0" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="Gradle: org.glassfish.jersey.bundles.repackaged:jersey-jsr166e:2.22.2" level="project" />
-    <orderEntry type="library" name="Gradle: commons-io:commons-io:2.4" level="project" />
+    <orderEntry type="library" name="Gradle: com.querydsl:querydsl-core:4.1.4" level="project" />
+    <orderEntry type="library" name="Gradle: commons-codec:commons-codec:1.6" level="project" />
+    <orderEntry type="library" name="Gradle: com.cloudant:cloudant-http:2.9.0" level="project" />
     <orderEntry type="library" name="Gradle: com.squareup.okio:okio:1.12.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.guava:guava:18.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.code.findbugs:jsr305:1.3.9" level="project" />
+    <orderEntry type="library" name="Gradle: com.mysema.commons:mysema-commons-lang:0.2.4" level="project" />
+    <orderEntry type="library" name="Gradle: com.infradna.tool:bridge-method-annotation:1.13" level="project" />
     <orderEntry type="library" name="Gradle: com.google.code.gson:gson:2.8.0" level="project" />
     <orderEntry type="library" name="Java EE 6-Java EE 6" level="project" />
   </component>
