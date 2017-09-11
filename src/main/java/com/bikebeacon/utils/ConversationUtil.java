@@ -68,9 +68,9 @@ public class ConversationUtil extends BaseUtilClass implements Runnable {
         try {
             MessageRequest request;
             if (context != null)
-                request = new MessageRequest.Builder().inputText(input).context(context).build();
+                request = new MessageRequest.Builder().inputText(input == null ? "" : input).context(context).build();
             else
-                request = new MessageRequest.Builder().inputText(input).build();
+                request = new MessageRequest.Builder().inputText(input == null ? "" : input).build();
             MessageResponse response = convo.message(CONVERSATION_WORKSPACE_ID, request).execute();
             setContext(response.getContext());
             success(response);

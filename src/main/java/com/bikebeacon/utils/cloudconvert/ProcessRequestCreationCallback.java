@@ -47,7 +47,7 @@ public class ProcessRequestCreationCallback extends CloudConvertCallback {
             requestJson.addProperty(CLOUD_CONVERT_PROCESS_REQUEST_OUTPUT_FORMAT, outputFormat == null ? "mp3" : outputFormat);
             log_f("CloudConvertUtil->ProcessRequestCreationCallback", "Json is: %s", requestJson.toString());
 
-            Request starProcessingRequest = new Request.Builder()
+            Request startProcessRequest = new Request.Builder()
                     .url(processURL).method("POST", new RequestBody() {
                         @Override
                         public MediaType contentType() {
@@ -59,7 +59,8 @@ public class ProcessRequestCreationCallback extends CloudConvertCallback {
                             sink.write(requestJson.toString().getBytes());
                         }
                     }).header("Authorization", "Bearer " + apiKey).header("Content-Type", "application/json").build();
-            clientHTTP.newCall(starProcessingRequest).enqueue(new ProcessingRequestCallback(ccUtil));
+            System.out.println(startProcessRequest);
+            clientHTTP.newCall(startProcessRequest).enqueue(new ProcessingRequestCallback(ccUtil));
             response.close();
         }
     }

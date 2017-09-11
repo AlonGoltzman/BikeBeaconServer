@@ -10,18 +10,16 @@ import com.google.gson.internal.LinkedTreeMap;
 import com.ibm.watson.developer_cloud.conversation.v1.model.MessageResponse;
 import com.ibm.watson.developer_cloud.speech_to_text.v1.model.SpeechResults;
 
-import java.io.*;
+import java.io.File;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Timer;
 
 import static com.bikebeacon.pojo.Constants.*;
 import static com.bikebeacon.utils.AssetsUtil.ensureFileReady;
 import static com.bikebeacon.utils.PrintUtil.error;
 import static com.bikebeacon.utils.PrintUtil.log;
-import static com.bikebeacon.utils.PrintUtil.log_f;
 
 public final class CentralControlHub implements CaseHandler, TaskCompletionListener {
 
@@ -165,11 +163,13 @@ public final class CentralControlHub implements CaseHandler, TaskCompletionListe
                 jerryContext = (LinkedTreeMap<String, Object>) ownerCase.getJerryContext();
                 if (jerryContext.containsKey(CONVERSATION_CONTEXT_NUMBER) &&
                         jerryContext.containsKey(CONVERSATION_CONTEXT_CALL) &&
-                        (boolean) jerryContext.get(CONVERSATION_CONTEXT_CALL))
+                        (Boolean) jerryContext.get(CONVERSATION_CONTEXT_CALL))
                     FCMData.addProperty(FCM_CALL, ownerCase.getJerryContext().get(CONVERSATION_CONTEXT_NUMBER).toString());
+                else if ((Boolean) jerryContext.get(CONVERSATION_CONTEXT_CALL_POLICE))
                 FCMMessage.addProperty("to", getTokenForOwner(ownerCase.getOwner()));
                 FCMMessage.addProperty("priority", "high");
                 FCMMessage.add("data", FCMData);
+                log("CCH->onSuccess", FCMMessage.toString());
                 fcmUtil.setRequestJson(FCMMessage);
                 fcmUtil.execute();
                 break;
@@ -185,6 +185,7 @@ public final class CentralControlHub implements CaseHandler, TaskCompletionListe
                 } catch (IndexOutOfBoundsException e) {
                     error("CCH->onSuccess", "Nothing understood from what the person was saying.");
                 }
+                log("CCH->onSuccess", "STT Response: " + actualSTTResponse);
                 mailingListUtil = new MailingListUtil(new Unique(UUID), this);
                 mailingListUtil.setOwnerCase(ownerCase);
                 jerryContext = (LinkedTreeMap<String, Object>) ownerCase.getJerryContext();
@@ -198,9 +199,11 @@ public final class CentralControlHub implements CaseHandler, TaskCompletionListe
             case 3: //Conversation Util
                 ownerCase = (Case) replyParams[0];
                 MessageResponse response = (MessageResponse) replyParams[1];
+                String jerryResponse = response.getText().get(0);
+                log("CCH->onSuccess", "Conversation Response: " + jerryResponse);
                 ownerCase.setJerryContext(response.getContext());
                 ttsUtil = new TTSUtil(this);
-                ttsUtil.setInput(response.getText().get(0));
+                ttsUtil.setInput(jerryResponse);
                 ttsUtil.setHandlingCase(ownerCase);
                 outputFile = new File(path, ownerCase.getOwner() + ".wav");
                 if (!ensureFileReady(outputFile)) {
@@ -211,7 +214,6 @@ public final class CentralControlHub implements CaseHandler, TaskCompletionListe
                 ttsUtil.execute();
                 break;
             case 5: //FCM Util
-                log("CCH->onSuccess", "FCM Message went through.");
                 break;
             case 6: //CloudConvert Util
                 ownerCase = (Case) replyParams[0];

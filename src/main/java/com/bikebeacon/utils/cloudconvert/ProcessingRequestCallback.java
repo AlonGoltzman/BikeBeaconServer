@@ -25,6 +25,7 @@ public class ProcessingRequestCallback extends CloudConvertCallback {
         clientHTTP = util.getHTTPClient();
         processURL = util.getProcessURL();
         inputAudioFile = util.getInputAudioFile();
+        System.out.println("Initialized ProcessingRequestCallback.");
     }
 
     @Override
