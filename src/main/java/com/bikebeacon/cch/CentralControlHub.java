@@ -161,11 +161,14 @@ public final class CentralControlHub implements CaseHandler, TaskCompletionListe
                 FCMData = new JsonObject();
                 FCMData.addProperty(FCM_URL, key);
                 jerryContext = (LinkedTreeMap<String, Object>) ownerCase.getJerryContext();
-                if (jerryContext.containsKey(CONVERSATION_CONTEXT_NUMBER) &&
-                        jerryContext.containsKey(CONVERSATION_CONTEXT_CALL) &&
-                        (Boolean) jerryContext.get(CONVERSATION_CONTEXT_CALL))
-                    FCMData.addProperty(FCM_CALL, ownerCase.getJerryContext().get(CONVERSATION_CONTEXT_NUMBER).toString());
-                else if ((Boolean) jerryContext.get(CONVERSATION_CONTEXT_CALL_POLICE))
+                if (jerryContext != null) {
+                    if (jerryContext.containsKey(CONVERSATION_CONTEXT_NUMBER) &&
+                            jerryContext.containsKey(CONVERSATION_CONTEXT_CALL) &&
+                            (Boolean) jerryContext.get(CONVERSATION_CONTEXT_CALL))
+                        FCMData.addProperty(FCM_CALL, ownerCase.getJerryContext().get(CONVERSATION_CONTEXT_NUMBER).toString());
+                    else if (jerryContext.get(CONVERSATION_CONTEXT_CALL_POLICE) != null && (Boolean) jerryContext.get(CONVERSATION_CONTEXT_CALL_POLICE))
+                        FCMData.addProperty(FCM_CALL, "911z");
+                }
                 FCMMessage.addProperty("to", getTokenForOwner(ownerCase.getOwner()));
                 FCMMessage.addProperty("priority", "high");
                 FCMMessage.add("data", FCMData);
